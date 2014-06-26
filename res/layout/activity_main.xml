@@ -12,5 +12,10 @@
         android:layout_height="wrap_content"
         android:text="Iniciar" />
 
+    
+     <ListView  
+         android:id="@+id/listPastas"  
+         android:layout_width="fill_parent"  
+         android:layout_height="wrap_content" />  
 </FrameLayout>
 

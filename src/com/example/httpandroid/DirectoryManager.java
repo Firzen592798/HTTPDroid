@@ -37,9 +37,10 @@ public class DirectoryManager {
 	    {
 	        return null;
 	    }
-
-	    String[] lista = folder.list().clone();
-	    
+	    String[] lista = null;
+	    if(folder.list() != null){
+	    	lista = folder.list().clone();
+	    }
 		return lista;
 	    
 	}
