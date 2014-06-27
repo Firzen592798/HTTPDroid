@@ -7,15 +7,16 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
 
 import com.example.httpandroid.NanoHTTPD.Response.Status;
 
-import android.support.v7.app.ActionBarActivity;
-import android.support.v7.app.ActionBar;
 import android.support.v4.app.Fragment;
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
@@ -30,10 +31,11 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ListView;
 import android.widget.TextView;
 import android.os.Build;
 
-public class MainActivity extends ActionBarActivity {
+public class MainActivity extends Activity {
 
 	private static final int PORT = 8080;
 	  private TextView hello;
@@ -41,16 +43,28 @@ public class MainActivity extends ActionBarActivity {
 	  private Button buttonIniciar;
 	  private WebServer server;
 	  private Handler handler = new Handler();
+	 private FileListAdapter adapter;
+	  
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         buttonIniciar = (Button) findViewById(R.id.buttonIniciar);
-        String[] diretorios = DirectoryManager.readLogList("");
-        for(int i = 0; i < diretorios.length; i++){
-        	Log.w("FILE", diretorios[i]);
+        
+        String[] diretorios = DirectoryManager.readLogList(".");
+        List<String> dir = new ArrayList();
+        
+        for (int i=0; i < diretorios.length; i++){
+        	Log.w("Diretorio", diretorios[i]);
+        	dir.add(diretorios[i]);
         }
         
+        ListView lv = (ListView)findViewById(R.id.listPastas);
+		adapter = new FileListAdapter(this, dir);
+		if(lv != null){
+		lv.setAdapter(adapter);
+		lv.setTextFilterEnabled(true);
+		}
         //DirectoryManager.getListFiles(new File("/download"));
         server = new WebServer();
         try {
@@ -95,6 +109,11 @@ public class MainActivity extends ActionBarActivity {
             return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+    
+    @Override
+    public void onBackPressed() {
+    	adapter.back();
     }
 
     /**

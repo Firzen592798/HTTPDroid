@@ -1,5 +1,5 @@
 package com.example.httpandroid;
-
+//Firzen592798
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
@@ -37,9 +37,10 @@ public class DirectoryManager {
 	    {
 	        return null;
 	    }
-
-	    String[] lista = folder.list().clone();
-	    
+	    String[] lista = null;
+	    if(folder.list() != null){
+	    	lista = folder.list().clone();
+	    }
 		return lista;
 	    
 	}
