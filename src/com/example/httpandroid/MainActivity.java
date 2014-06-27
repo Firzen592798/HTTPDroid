@@ -141,8 +141,8 @@ public class MainActivity extends ActionBarActivity {
             InputStream mbuffer = null;
             String html = "";
             try {
-            	mbuffer = ctx.getAssets().open("index.html");
-            	
+            	mbuffer = null;
+            	Log.w("", "Decodificando");
             	if(uri!=null){
 
                     if(uri.contains(".js")){
@@ -162,7 +162,7 @@ public class MainActivity extends ActionBarActivity {
                         return new NanoHTTPD.Response(Status.OK, MIME_MP3, mbuffer);        
                     }
                     else{
-                                mbuffer = ctx.getAssets().open("index.html");
+                         mbuffer = ctx.getAssets().open("index.html");
                                 return new NanoHTTPD.Response(Status.OK, MIME_HTML, mbuffer);
                     }
                     }
