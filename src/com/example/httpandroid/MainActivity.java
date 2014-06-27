@@ -49,7 +49,6 @@ public class MainActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        buttonIniciar = (Button) findViewById(R.id.buttonIniciar);
         
         String[] diretorios = DirectoryManager.readLogList(".");
         List<String> dir = new ArrayList();
@@ -65,23 +64,29 @@ public class MainActivity extends Activity {
 		lv.setAdapter(adapter);
 		lv.setTextFilterEnabled(true);
 		}
+		startServer("");
         //DirectoryManager.getListFiles(new File("/download"));
-        server = new WebServer();
-        try {
-            server.start();
-            ctx = this.getApplicationContext();
-        } catch(IOException ioe) {
-            Log.d("HttpServer", "Server deu pau");
-        }
-        Log.d("HttpServer", "Server iniciado");
-        buttonIniciar.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-            	String url = "http://localhost:8080";
-            	Intent i = new Intent(Intent.ACTION_VIEW);
-            	i.setData(Uri.parse(url));
-            	startActivity(i);	
-            }
-        });
+        
+    }
+    
+    public void startServer(String path){
+    	
+    	server = new WebServer();
+		    try {
+		        server.start();
+		        ctx = this.getApplicationContext();
+		    } catch(IOException ioe) {
+		        Log.d("HttpServer", "Server deu pau");
+		    }
+		    Log.d("HttpServer", "Server iniciado");
+		    buttonIniciar.setOnClickListener(new View.OnClickListener() {
+		        public void onClick(View v) {
+		        	String url = "http://localhost:8080";
+		        	Intent i = new Intent(Intent.ACTION_VIEW);
+		        	i.setData(Uri.parse(url));
+		        	startActivity(i);	
+		        }
+		    });
     }
 
     @Override
@@ -181,7 +186,7 @@ public class MainActivity extends Activity {
                         return new NanoHTTPD.Response(Status.OK, MIME_MP3, mbuffer);        
                     }
                     else{
-                         mbuffer = ctx.getAssets().open("index.html");
+                         mbuffer = ctx.getAssets().open("Phonegap/index.html");
                                 return new NanoHTTPD.Response(Status.OK, MIME_HTML, mbuffer);
                     }
                     }

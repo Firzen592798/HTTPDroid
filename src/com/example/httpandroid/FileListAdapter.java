@@ -16,6 +16,7 @@ public class FileListAdapter extends BaseAdapter{
 	   private List<String> mArquivos;
 	   public String parentDirectory = "";
 	   public String currentFolder = "";
+	   public boolean playable = false;
 	   public FileListAdapter(Context context, List<String> arquivos) {  
 		   this.mContext = context;  
 	      this.mArquivos = arquivos;  
@@ -64,30 +65,41 @@ public class FileListAdapter extends BaseAdapter{
 	      if(pItem != null){
 	    	  currentFolder = pItem;
 	    	  String[] subDirectories = DirectoryManager.readLogList(parentDirectory+pItem);
-	    	  if(subDirectories != null){
-	    		  for(int i = 0; i < subDirectories.length; i++){
-	    			  Log.w("Subdiretorio", subDirectories[i]);
-	    		  }
-	    	  }
 	    	  TextView pasta = (TextView) view.findViewById(R.id.textNomePastas);
 	    	  ImageView image = (ImageView) view.findViewById(R.id.imgPastas);
 	    	  if(pasta != null){
 	    		  pasta.setText(pItem);
 	    		  if(subDirectories != null){
-	    			  image.setImageResource(R.drawable.folder);
+	    			  int correctFiles = 0;
+	    			  for(int i = 0; i < subDirectories.length; i++){
+		    			  if(subDirectories[i].equals("index.html") || subDirectories[i].equals("images") ||subDirectories[i].equals("c2runtime.js") ||subDirectories[i].equals("config.xml") ||subDirectories[i].equals("loading-logo.png")){
+		    				  correctFiles++;
+		    				  
+		    			  }
+		    		  }
+	    			  if(correctFiles < 5){
+	    				  image.setImageResource(R.drawable.folder);
+	    			  }else{
+	    				  playable = true;
+	    				  image.setImageResource(R.drawable.play);
+	    			  }
 	    		  }
 	    		  else{
-	    			  image.setImageResource(R.drawable.play);
+	    			  image.setImageResource(R.drawable.file);
 	    		  }
 	    	  }
 	      }
 	      view.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				parentDirectory = parentDirectory + pItem + "/";
-				String[] subDirectories = DirectoryManager.readLogList(parentDirectory);
-				if(subDirectories != null){
-					refresh(subDirectories);
+				if(!playable){
+					parentDirectory = parentDirectory + pItem + "/";
+					String[] subDirectories = DirectoryManager.readLogList(parentDirectory);
+					if(subDirectories != null){
+						refresh(subDirectories);
+					}
+				}else{
+					((MainActivity)mContext).startServer("");
 				}
 			}		 
 	      });
