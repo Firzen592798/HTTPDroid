@@ -31,6 +31,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.os.Build;
@@ -59,11 +60,32 @@ public class MainActivity extends Activity {
         }
         
         ListView lv = (ListView)findViewById(R.id.listPastas);
+        ImageButton deviceButton = (ImageButton)findViewById(R.id.device);
+        ImageButton sdcardButton = (ImageButton)findViewById(R.id.sdcard);
+        
 		adapter = new FileListAdapter(this, dir);
 		if(lv != null){
-		lv.setAdapter(adapter);
-		lv.setTextFilterEnabled(true);
+			lv.setAdapter(adapter);
+			lv.setTextFilterEnabled(true);
 		}
+		
+		deviceButton.setOnClickListener(new View.OnClickListener() {
+	        public void onClick(View v) {
+	        	 String[] diretoriosDevice = DirectoryManager.readLogList(".");
+	        	 Log.w("Diretorios Device", String.valueOf(diretoriosDevice.length));
+	        	adapter.refresh(diretoriosDevice);
+	        }
+	    });
+		
+		sdcardButton.setOnClickListener(new View.OnClickListener() {
+	        public void onClick(View v) {
+	        	 String[] diretoriosSD = DirectoryManager.readLogListSDCard("");
+	        	 Log.w("Diretorios SD", String.valueOf(diretoriosSD.length));
+	        	 adapter.refresh(diretoriosSD);
+	        }
+	    });
+		
+		
 		startServer("");
         //DirectoryManager.getListFiles(new File("/download"));
         
@@ -79,14 +101,14 @@ public class MainActivity extends Activity {
 		        Log.d("HttpServer", "Server deu pau");
 		    }
 		    Log.d("HttpServer", "Server iniciado");
-		    buttonIniciar.setOnClickListener(new View.OnClickListener() {
+		    /*buttonIniciar.setOnClickListener(new View.OnClickListener() {
 		        public void onClick(View v) {
 		        	String url = "http://localhost:8080";
 		        	Intent i = new Intent(Intent.ACTION_VIEW);
 		        	i.setData(Uri.parse(url));
 		        	startActivity(i);	
 		        }
-		    });
+		    });*/
     }
 
     @Override
@@ -150,11 +172,16 @@ public class MainActivity extends Activity {
         MIME_DEFAULT_BINARY = "application/octet-stream",
         MIME_XML = "text/xml",
     	MIME_MP3 = "audio/mpeg";
+    	private String path;
         public WebServer()
         {
             super(8080);
         }
 
+        public void setPath(String path){
+        	this.path = path;
+        }
+        
         @Override
         public Response serve(String uri, Method method, 
                               Map<String, String> header,
@@ -186,7 +213,10 @@ public class MainActivity extends Activity {
                         return new NanoHTTPD.Response(Status.OK, MIME_MP3, mbuffer);        
                     }
                     else{
-                         mbuffer = ctx.getAssets().open("Phonegap/index.html");
+                    	 //String url  = "/storage/extSdCard/www/index.html";
+                    	 //FileInputStream  fis = new FileInputStream(url);
+                         mbuffer = ctx.getAssets().open("index.html");
+                         Log.w("Buffer", mbuffer.toString());
                                 return new NanoHTTPD.Response(Status.OK, MIME_HTML, mbuffer);
                     }
                     }

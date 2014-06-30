@@ -27,6 +27,22 @@ public class DirectoryManager {
 	    return inFiles;
 	}
 	
+	public static String[] readLogListSDCard(String filepath){
+	    File directory = Environment.getExternalStorageDirectory();
+
+	    File folder = new File("/storage/extSdCard/" + filepath);
+
+	    if ( !folder.exists() )
+	    {
+	        return null;
+	    }
+	    String[] lista = null;
+	    if(folder.list() != null){
+	    	lista = folder.list().clone();
+	    }
+		return lista;
+	}
+	
 	public static String[] readLogList( String filePath )
 	{
 	    File directory = Environment.getExternalStorageDirectory();
@@ -42,7 +58,6 @@ public class DirectoryManager {
 	    	lista = folder.list().clone();
 	    }
 		return lista;
-	    
 	}
 	
 }

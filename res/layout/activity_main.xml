@@ -3,10 +3,30 @@
               android:layout_height="fill_parent" 
               android:orientation="vertical" >
     
+
+    
    <TextView android:id="@+id/text"
               android:layout_width="wrap_content"
               android:layout_height="wrap_content"
               android:text="Selecione o jogo" />
+   
+       <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:layout_width="fill_parent" 
+              android:layout_height="wrap_content" 
+              android:orientation="horizontal" >
+    
+    <ImageButton
+        android:id="@+id/device"
+        android:layout_width="50px"
+        android:layout_height="50px"
+        android:src="@drawable/device" />
+    
+    <ImageButton
+        android:id="@+id/sdcard"
+        android:layout_width="50px"
+        android:layout_height="50px"
+        android:src="@drawable/sdcard" />
+    </LinearLayout>
    
      <ListView
          android:id="@+id/listPastas"

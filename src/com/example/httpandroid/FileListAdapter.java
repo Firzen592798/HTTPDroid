@@ -3,6 +3,8 @@ package com.example.httpandroid;
 import java.util.List;
 
 import android.content.Context;
+import android.content.Intent;
+import android.net.Uri;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -72,16 +74,21 @@ public class FileListAdapter extends BaseAdapter{
 	    		  if(subDirectories != null){
 	    			  int correctFiles = 0;
 	    			  for(int i = 0; i < subDirectories.length; i++){
-		    			  if(subDirectories[i].equals("index.html") || subDirectories[i].equals("images") ||subDirectories[i].equals("c2runtime.js") ||subDirectories[i].equals("config.xml") ||subDirectories[i].equals("loading-logo.png")){
+		    			  if(subDirectories[i].equals("index.html") || subDirectories[i].equals("images") ||subDirectories[i].equals("c2runtime.js") ||subDirectories[i].equals("loading-logo.png")){
 		    				  correctFiles++;
 		    				  
 		    			  }
 		    		  }
-	    			  if(correctFiles < 5){
+	    			  if(correctFiles < 4){
 	    				  image.setImageResource(R.drawable.folder);
 	    			  }else{
 	    				  playable = true;
 	    				  image.setImageResource(R.drawable.play);
+	    				  
+	    				  String url = "http://localhost:8080";
+	  		        	  Intent i = new Intent(Intent.ACTION_VIEW);
+	  		        	  i.setData(Uri.parse(url));
+	  		        	  mContext.startActivity(i);	
 	    			  }
 	    		  }
 	    		  else{
