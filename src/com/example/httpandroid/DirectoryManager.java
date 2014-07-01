@@ -10,7 +10,14 @@ import android.util.Log;
 public class DirectoryManager {
 
 	//List<File> files = getListFiles(new File(".")); 
-
+	
+	public static final int SD_CARD = 1;
+	public static final int DEVICE = 2;
+	
+	private static String sdPath = "";
+	public static void setSDPath(String path){
+		DirectoryManager.sdPath = path;
+	}
 	public static List<File> getListFiles(File parentDir) {
 	    ArrayList<File> inFiles = new ArrayList<File>();
 	    File[] files = parentDir.listFiles();
@@ -43,13 +50,17 @@ public class DirectoryManager {
 		return lista;
 	}
 	
-	public static String[] readLogList( String filePath )
+	public static String[] readLogList(int tipo, String filePath )
 	{
+		File folder = null;
+		if(tipo == DEVICE){
 	    File directory = Environment.getExternalStorageDirectory();
-
-	    File folder = new File( directory + "/" + filePath );
-
-	    if ( !folder.exists() )
+	    Log.w("Path absoluto", directory.getAbsolutePath());
+	    folder = new File( directory + "/" + filePath );
+		}else if(tipo == SD_CARD){
+			folder = new File(sdPath + "/" + filePath);
+		}
+	    if ( !folder.exists() || !folder.isDirectory())
 	    {
 	        return null;
 	    }

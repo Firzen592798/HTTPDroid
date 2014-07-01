@@ -51,7 +51,7 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         
-        String[] diretorios = DirectoryManager.readLogList(".");
+        String[] diretorios = DirectoryManager.readLogList(DirectoryManager.DEVICE, ".");
         List<String> dir = new ArrayList();
         
         for (int i=0; i < diretorios.length; i++){
@@ -71,24 +71,30 @@ public class MainActivity extends Activity {
 		
 		deviceButton.setOnClickListener(new View.OnClickListener() {
 	        public void onClick(View v) {
-	        	 String[] diretoriosDevice = DirectoryManager.readLogList(".");
+	        	 String[] diretoriosDevice = DirectoryManager.readLogList(DirectoryManager.DEVICE, ".");
 	        	 Log.w("Diretorios Device", String.valueOf(diretoriosDevice.length));
+	        	
+	        	
+	        	adapter.device = DirectoryManager.DEVICE;
+	        	adapter.basePath = "";
+	        	adapter.parentDirectory = "";
 	        	adapter.refresh(diretoriosDevice);
 	        }
 	    });
-		
+		                                             
 		sdcardButton.setOnClickListener(new View.OnClickListener() {
 	        public void onClick(View v) {
-	        	 String[] diretoriosSD = DirectoryManager.readLogListSDCard("");
-	        	 Log.w("Diretorios SD", String.valueOf(diretoriosSD.length));
+	        	 String[] diretoriosSD = DirectoryManager.readLogList(DirectoryManager.SD_CARD, "");
+	        	 
+	        	 
+	        	 adapter.device = DirectoryManager.SD_CARD;
+	        	 adapter.basePath = "/storage/extSdCard";
+	        	 adapter.parentDirectory = "";
 	        	 adapter.refresh(diretoriosSD);
 	        }
 	    });
 		
-		
-		startServer("");
-        //DirectoryManager.getListFiles(new File("/download"));
-        
+		startServer("");   
     }
     
     public void startServer(String path){

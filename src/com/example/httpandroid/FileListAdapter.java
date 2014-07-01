@@ -16,12 +16,14 @@ import android.widget.TextView;
 public class FileListAdapter extends BaseAdapter{
 	private Context mContext;  
 	   private List<String> mArquivos;
+	   public int device = 2;
 	   public String parentDirectory = "";
 	   public String currentFolder = "";
-	   public boolean playable = false;
+	   public String basePath = "";
 	   public FileListAdapter(Context context, List<String> arquivos) {  
 		   this.mContext = context;  
-	      this.mArquivos = arquivos;  
+	       this.mArquivos = arquivos;  
+	       DirectoryManager.setSDPath("/storage/extSdCard");
 	   }  
 	   
 	   public void refresh(String[] novaLista){
@@ -38,7 +40,7 @@ public class FileListAdapter extends BaseAdapter{
 		   for(int i = 0; i < pastas.length - 1; i++){
 			   parentDirectory = parentDirectory + pastas[i] + "/";
 		   }
-		   String[] subDirectories = DirectoryManager.readLogList(parentDirectory);
+		   String[] subDirectories = DirectoryManager.readLogList(device, parentDirectory);
 		   refresh(subDirectories);
 	   }
 	   
@@ -58,55 +60,58 @@ public class FileListAdapter extends BaseAdapter{
 		   
 		  View view = convertView;
 	      if (view == null) {  
-	    	  Log.w("ERRO", "View Nula");
 	    	  view = LayoutInflater.from(mContext).inflate(R.layout.listlayout, p, false);  
-	    	 view.setTag("Arquivo nulo");
+	    	  view.setTag("Arquivo nulo");
 	      }
 	      final String pItem = mArquivos.get(position);
 	      
 	      if(pItem != null){
 	    	  currentFolder = pItem;
-	    	  String[] subDirectories = DirectoryManager.readLogList(parentDirectory+pItem);
-	    	  TextView pasta = (TextView) view.findViewById(R.id.textNomePastas);
+	    	  
+	    	  String[] subDirectories = DirectoryManager.readLogList(device, parentDirectory+pItem);
+	    	 
+	    	  TextView pastaTextView = (TextView) view.findViewById(R.id.textNomePastas);
 	    	  ImageView image = (ImageView) view.findViewById(R.id.imgPastas);
-	    	  if(pasta != null){
-	    		  pasta.setText(pItem);
+	    	  if(pastaTextView != null){
+	    		  pastaTextView.setText(pItem);
 	    		  if(subDirectories != null){
 	    			  int correctFiles = 0;
 	    			  for(int i = 0; i < subDirectories.length; i++){
 		    			  if(subDirectories[i].equals("index.html") || subDirectories[i].equals("images") ||subDirectories[i].equals("c2runtime.js") ||subDirectories[i].equals("loading-logo.png")){
 		    				  correctFiles++;
-		    				  
 		    			  }
 		    		  }
 	    			  if(correctFiles < 4){
 	    				  image.setImageResource(R.drawable.folder);
+	    				  view.setTag("NotPlayable");
 	    			  }else{
-	    				  playable = true;
 	    				  image.setImageResource(R.drawable.play);
-	    				  
-	    				  String url = "http://localhost:8080";
-	  		        	  Intent i = new Intent(Intent.ACTION_VIEW);
-	  		        	  i.setData(Uri.parse(url));
-	  		        	  mContext.startActivity(i);	
+	    				  view.setTag("Playable");
 	    			  }
 	    		  }
 	    		  else{
+	    			  view.setTag("NotPlayable");
 	    			  image.setImageResource(R.drawable.file);
 	    		  }
 	    	  }
+	    	  
 	      }
 	      view.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				if(!playable){
+				if(v.getTag().equals("NotPlayable")){
 					parentDirectory = parentDirectory + pItem + "/";
-					String[] subDirectories = DirectoryManager.readLogList(parentDirectory);
+					String[] subDirectories = DirectoryManager.readLogList(device, parentDirectory);
 					if(subDirectories != null){
 						refresh(subDirectories);
 					}
-				}else{
+				}else {
+					
 					((MainActivity)mContext).startServer("");
+					String url = "http://localhost:8080";
+		        	  Intent i = new Intent(Intent.ACTION_VIEW);
+		        	  i.setData(Uri.parse(url));
+		        	  mContext.startActivity(i);	
 				}
 			}		 
 	      });
