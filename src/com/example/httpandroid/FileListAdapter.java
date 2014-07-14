@@ -2,9 +2,12 @@ package com.example.httpandroid;
 
 import java.util.List;
 
+import com.example.httpandroid.exceptions.NoSDCardException;
+
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Environment;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -12,6 +15,7 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 public class FileListAdapter extends BaseAdapter{
 	private Context mContext;  
@@ -21,6 +25,7 @@ public class FileListAdapter extends BaseAdapter{
 	   public String currentFolder = "";
 	   public String basePath = "";
 	   public FileListAdapter(Context context, List<String> arquivos) {  
+		   parentDirectory = "JogosHttpDroid/";
 		   this.mContext = context;  
 	       this.mArquivos = arquivos;  
 	       DirectoryManager.setSDPath("/storage/extSdCard");
@@ -40,8 +45,14 @@ public class FileListAdapter extends BaseAdapter{
 		   for(int i = 0; i < pastas.length - 1; i++){
 			   parentDirectory = parentDirectory + pastas[i] + "/";
 		   }
-		   String[] subDirectories = DirectoryManager.readLogList(device, parentDirectory);
-		   refresh(subDirectories);
+		   String[] subDirectories;
+		try {
+			subDirectories = DirectoryManager.readLogList(device, parentDirectory);
+			refresh(subDirectories);
+		} catch (NoSDCardException e) {
+			Toast.makeText(mContext, "Cartão SD não está presente ou não está habilitado nesse dispositivo", 3).show();
+		}
+		   
 	   }
 	   
 	   public int getCount() {  
@@ -64,17 +75,24 @@ public class FileListAdapter extends BaseAdapter{
 	    	  view.setTag("Arquivo nulo");
 	      }
 	      final String pItem = mArquivos.get(position);
-	      
 	      if(pItem != null){
 	    	  currentFolder = pItem;
 	    	  
-	    	  String[] subDirectories = DirectoryManager.readLogList(device, parentDirectory+pItem);
+	    	  String[] subDirectories = null;
+				try {
+					Log.w("Diretorio Buscado", parentDirectory+pItem);
+					subDirectories = DirectoryManager.readLogList(device, parentDirectory+pItem);
+				} catch (NoSDCardException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 	    	 
 	    	  TextView pastaTextView = (TextView) view.findViewById(R.id.textNomePastas);
 	    	  ImageView image = (ImageView) view.findViewById(R.id.imgPastas);
+	    	  Log.w("Arquivo", pItem);
 	    	  if(pastaTextView != null){
 	    		  pastaTextView.setText(pItem);
-	    		  if(subDirectories != null){
+	    		  if(subDirectories != null){ //ISSO AKI TA VINDO NULO
 	    			  int correctFiles = 0;
 	    			  for(int i = 0; i < subDirectories.length; i++){
 		    			  if(subDirectories[i].equals("index.html") || subDirectories[i].equals("images") ||subDirectories[i].equals("c2runtime.js") ||subDirectories[i].equals("loading-logo.png")){
@@ -101,14 +119,21 @@ public class FileListAdapter extends BaseAdapter{
 			public void onClick(View v) {
 				if(v.getTag().equals("NotPlayable")){
 					parentDirectory = parentDirectory + pItem + "/";
-					String[] subDirectories = DirectoryManager.readLogList(device, parentDirectory);
+					String[] subDirectories = null;
+					try {
+						subDirectories = DirectoryManager.readLogList(device, parentDirectory);
+					} catch (NoSDCardException e) {
+						Toast.makeText(mContext, "Cartão SD não está presente ou não está habilitado nesse dispositivo", 3).show();
+					}
 					if(subDirectories != null){
 						refresh(subDirectories);
 					}
 				}else {
-					
-					((MainActivity)mContext).startServer("");
-					String url = "http://localhost:8080";
+					  ((MainActivity)mContext).startServer("");
+					  String url = "http://localhost:8080" +"/"+  parentDirectory + pItem + "/index.html";
+					  Log.w("URL", url);
+					  Log.w("PatternDirecotry", parentDirectory);
+					  Log.w("PItem", pItem);
 		        	  Intent i = new Intent(Intent.ACTION_VIEW);
 		        	  i.setData(Uri.parse(url));
 		        	  mContext.startActivity(i);	

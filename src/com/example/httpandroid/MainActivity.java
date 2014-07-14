@@ -13,7 +13,10 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
 
+import org.apache.commons.net.ftp.FTPClient;
+
 import com.example.httpandroid.NanoHTTPD.Response.Status;
+import com.example.httpandroid.exceptions.NoSDCardException;
 
 import android.support.v4.app.Fragment;
 import android.app.Activity;
@@ -34,6 +37,7 @@ import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 import android.os.Build;
 
 public class MainActivity extends Activity {
@@ -46,22 +50,56 @@ public class MainActivity extends Activity {
 	  private Handler handler = new Handler();
 	 private FileListAdapter adapter;
 	  
+	 private void download(){
+			Downloader downloader = new Downloader();
+			
+			 String server = "10.7.172.249";
+		     int port = 2100;
+		     String user = "Firzen";
+		     String pass = "tyranitar392";
+		     FTPClient ftpClient = null;
+			try {
+				ftpClient = downloader.connectFTP(server, port, user, pass);
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		     String parentDir = "ftproot";
+		     String currentDir = "teste";
+	 	
+			try {
+				downloader.downloadDirectory(ftpClient, parentDir, currentDir, "storage//emulated//0//");
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+	 }
+	 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
         
-        String[] diretorios = DirectoryManager.readLogList(DirectoryManager.DEVICE, ".");
+        setContentView(R.layout.activity_main);
+        ctx = this.getApplicationContext();
+        String[] diretorios = null;
+        DirectoryManager.createDefaultDirectory();
+		try {
+			diretorios = DirectoryManager.readLogList(DirectoryManager.DEVICE, "/JogosHttpDroid");
+		} catch (NoSDCardException e1) {
+			
+		}
         List<String> dir = new ArrayList();
         
         for (int i=0; i < diretorios.length; i++){
-        	Log.w("Diretorio", diretorios[i]);
+        	//Log.w("Diretorio", diretorios[i]);
         	dir.add(diretorios[i]);
         }
         
         ListView lv = (ListView)findViewById(R.id.listPastas);
         ImageButton deviceButton = (ImageButton)findViewById(R.id.device);
         ImageButton sdcardButton = (ImageButton)findViewById(R.id.sdcard);
+        
+        download();
         
 		adapter = new FileListAdapter(this, dir);
 		if(lv != null){
@@ -71,8 +109,14 @@ public class MainActivity extends Activity {
 		
 		deviceButton.setOnClickListener(new View.OnClickListener() {
 	        public void onClick(View v) {
-	        	 String[] diretoriosDevice = DirectoryManager.readLogList(DirectoryManager.DEVICE, ".");
-	        	 Log.w("Diretorios Device", String.valueOf(diretoriosDevice.length));
+	        	 String[] diretoriosDevice = null;
+				try {
+					diretoriosDevice = DirectoryManager.readLogList(DirectoryManager.DEVICE, ".");
+				} catch (NoSDCardException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+	        	 //Log.w("Diretorios Device", String.valueOf(diretoriosDevice.length));
 	        	
 	        	
 	        	adapter.device = DirectoryManager.DEVICE;
@@ -84,13 +128,18 @@ public class MainActivity extends Activity {
 		                                             
 		sdcardButton.setOnClickListener(new View.OnClickListener() {
 	        public void onClick(View v) {
-	        	 String[] diretoriosSD = DirectoryManager.readLogList(DirectoryManager.SD_CARD, "");
+	        	
+	        	 String[] diretoriosSD = null;
+				try {
+					diretoriosSD = DirectoryManager.readLogList(DirectoryManager.SD_CARD, "");
+					adapter.device = DirectoryManager.SD_CARD;
+		        	 adapter.basePath = "/storage/extSdCard";
+		        	 adapter.parentDirectory = "";
+		        	 adapter.refresh(diretoriosSD);
+				} catch (NoSDCardException e) {
+					Toast.makeText(ctx, "Cartão SD não está presente ou não está habilitado nesse dispositivo", 3);
+				}
 	        	 
-	        	 
-	        	 adapter.device = DirectoryManager.SD_CARD;
-	        	 adapter.basePath = "/storage/extSdCard";
-	        	 adapter.parentDirectory = "";
-	        	 adapter.refresh(diretoriosSD);
 	        }
 	    });
 		
@@ -197,38 +246,35 @@ public class MainActivity extends Activity {
 
             InputStream mbuffer = null;
             String html = "";
+            String url  = "/storage/extSdCard/"+uri.substring(1);
+            Log.w("Url", url);
             try {
             	mbuffer = null;
-            	Log.w("", "Decodificando");
             	if(uri!=null){
-
                     if(uri.contains(".js")){
-                            mbuffer = ctx.getAssets().open(uri.substring(1));
+                    	mbuffer = new FileInputStream(url);
                             return new NanoHTTPD.Response(Status.OK, MIME_JS, mbuffer);
                     }else if(uri.contains(".css")){
-                            mbuffer = ctx.getAssets().open(uri.substring(1));
+                    	mbuffer = new FileInputStream(url);
                             return new NanoHTTPD.Response(Status.OK, MIME_CSS, mbuffer);
 
                     }else if(uri.contains(".png")){
-                            mbuffer = ctx.getAssets().open(uri.substring(1));      
+                    	mbuffer = new FileInputStream(url);     
                             // HTTP_OK = "200 OK" or HTTP_OK = Status.OK;(check comments)
                             return new NanoHTTPD.Response(Status.OK, MIME_PNG, mbuffer);        
                     }else if(uri.contains(".mp3")){
-                        mbuffer = ctx.getAssets().open(uri.substring(1));      
+                    	mbuffer = new FileInputStream(url);
                         // HTTP_OK = "200 OK" or HTTP_OK = Status.OK;(check comments)
                         return new NanoHTTPD.Response(Status.OK, MIME_MP3, mbuffer);        
                     }
-                    else{
-                    	 //String url  = "/storage/extSdCard/www/index.html";
-                    	 //FileInputStream  fis = new FileInputStream(url);
-                         mbuffer = ctx.getAssets().open("index.html");
+                    else if(uri.contains(".html")){
+                    	 mbuffer = new FileInputStream(url);
                          Log.w("Buffer", mbuffer.toString());
                                 return new NanoHTTPD.Response(Status.OK, MIME_HTML, mbuffer);
                     }
-                    }
-            	}
-
-
+                    
+                }
+            }
             catch(IOException ioe) {
                 Log.w("Httpd", ioe.toString());
             }
